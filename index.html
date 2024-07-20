@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>チュー王子 - 中央大学マスコットキャラクター</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #EBF8FF;
+            color: #2C5282;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #2B6CB0;
+        }
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #canvasContainer {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .profile {
+            flex: 1;
+            min-width: 300px;
+            margin-top: 2rem;
+        }
+        .activities {
+            margin-top: 3rem;
+        }
+        .activity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .activity-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1rem;
+            background-color: #2C5282;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>チュー王子</h1>
+            <p>中央大学マスコットキャラクター</p>
+        </header>
+        <div class="content">
+            <div id="canvasContainer"></div>
+            <div class="profile">
+                <h2>プロフィール</h2>
+                <ul>
+                    <li><strong>使命:</strong> 中央大学に関する諸活動・団体を応援すること</li>
+                    <li><strong>性別:</strong> 男</li>
+                    <li><strong>性格:</strong> 感動屋、笑い上戸で泣き上戸</li>
+                    <li><strong>特技:</strong> エールを送ること</li>
+                    <li><strong>好きなタイプ:</strong> 頑張っている人、努力している人</li>
+                </ul>
+            </div>
+        </div>
+        <div class="activities">
+            <h2>チュー王子の活躍</h2>
+            <div class="activity-grid">
+                <div class="activity-card">
+                    <h3>卒業式・入学式</h3>
+                    <p>記念撮影の列ができるほどの人気ぶり！</p>
+                </div>
+                <div class="activity-card">
+                    <h3>オープンキャンパス</h3>
+                    <p>受験生を元気づける応援団長！</p>
+                </div>
+                <div class="activity-card">
+                    <h3>神宮球場デビュー</h3>
+                    <p>2017年、硬式野球部の応援に初登場！</p>
+                </div>
+                <div class="activity-card">
+                    <h3>YouTube出演</h3>
+                    <p>「チュー王子が行く！！」シリーズで大活躍</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>© 2024 中央大学 チュー王子</p>
+    </footer>
+
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(400, 400);
+        document.getElementById('canvasContainer').appendChild(renderer.domElement);
+
+        // マウスの体を作成
+        const bodyGeometry = new THREE.SphereGeometry(1, 32, 32);
+        const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xFEF4E5 });
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        scene.add(body);
+
+        // 耳を作成
+        const earGeometry = new THREE.SphereGeometry(0.45, 32, 32);
+        const earMaterial = new THREE.MeshPhongMaterial({ color: 0xFEF4E5 });
+        const leftEar = new THREE.Mesh(earGeometry, earMaterial);
+        leftEar.position.set(-0.75, 0.75, 0);
+        body.add(leftEar);
+        const rightEar = leftEar.clone();
+        rightEar.position.set(0.75, 0.75, 0);
+        body.add(rightEar);
+
+        // 目を作成
+        const eyeGeometry = new THREE.CircleGeometry(0.08, 32);
+        const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+        leftEye.position.set(-0.25, 0.2, 0.98);
+        body.add(leftEye);
+        const rightEye = leftEye.clone();
+        rightEye.position.set(0.25, 0.2, 0.98);
+        body.add(rightEye);
+
+        // 王冠を作成
+        const crownGroup = new THREE.Group();
+        const crownBaseGeometry = new THREE.CylinderGeometry(0.6, 0.65, 0.4, 32, 1, false);
+        const crownMaterial = new THREE.MeshStandardMaterial({
+            color: 0xF1B010,
+            metalness: 0.8,
+            roughness: 0.2,
+        });
+        const crownBase = new THREE.Mesh(crownBaseGeometry, crownMaterial);
+        crownGroup.add(crownBase);
+
+        const decorationGeometry = new THREE.TorusGeometry(0.6, 0.03, 16, 100);
+        const decoration = new THREE.Mesh(decorationGeometry, crownMaterial);
+        decoration.rotation.x = Math.PI / 2;
+        decoration.position.y = 0.2;
+        crownGroup.add(decoration);
+
+        const spikeGeometry = new THREE.ConeGeometry(0.08, 0.2, 32);
+        for (let i = 0; i < 8; i++) {
+            const spike = new THREE.Mesh(spikeGeometry, crownMaterial);
+            const angle = (i / 8) * Math.PI * 2;
+            spike.position.set(Math.cos(angle) * 0.6, 0.3, Math.sin(angle) * 0.6);
+            spike.rotation.x = Math.PI / 2;
+            crownGroup.add(spike);
+        }
+
+        crownGroup.position.set(0, 1.1, 0);
+        body.add(crownGroup);
+
+        // ライトを追加
+        const light = new THREE.PointLight(0xFFFFFF, 1, 100);
+        light.position.set(5, 5, 10);
+        scene.add(light);
+
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+
+        camera.position.z = 4;
+
+        // アニメーション
+        function animate() {
+            requestAnimationFrame(animate);
+            body.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
