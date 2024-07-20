@@ -17,8 +17,12 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
         }
         header {
+            width: 100%;
             text-align: center;
             margin-bottom: 2rem;
         }
@@ -30,10 +34,11 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            align-items: center;
+            width: 100%;
         }
         #canvasContainer {
             width: 100%;
+            height: 400px;
             max-width: 400px;
             margin: 0 auto;
         }
@@ -41,8 +46,10 @@
             flex: 1;
             min-width: 300px;
             margin-top: 2rem;
+            padding-left: 2rem;
         }
         .activities {
+            width: 100%;
             margin-top: 3rem;
         }
         .activity-grid {
@@ -57,6 +64,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         footer {
+            width: 100%;
             text-align: center;
             margin-top: 3rem;
             padding: 1rem;
@@ -114,8 +122,9 @@
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(400, 400);
-        document.getElementById('canvasContainer').appendChild(renderer.domElement);
+        const canvasContainer = document.getElementById('canvasContainer');
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        canvasContainer.appendChild(renderer.domElement);
 
         // マウスの体を作成
         const bodyGeometry = new THREE.SphereGeometry(1, 32, 32);
@@ -143,6 +152,56 @@
         rightEye.position.set(0.25, 0.2, 0.98);
         body.add(rightEye);
 
+        // 眉毛を作成
+        const eyebrowGeometry = new THREE.BoxGeometry(0.15, 0.03, 0.05);
+        const eyebrowMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const leftEyebrow = new THREE.Mesh(eyebrowGeometry, eyebrowMaterial);
+        leftEyebrow.position.set(-0.25, 0.4, 0.98);
+        leftEyebrow.rotation.z = Math.PI / 24;
+        body.add(leftEyebrow);
+        const rightEyebrow = leftEyebrow.clone();
+        rightEyebrow.position.set(0.25, 0.4, 0.98);
+        rightEyebrow.rotation.z = -Math.PI / 24;
+        body.add(rightEyebrow);
+
+        // 鼻を作成
+        const noseGeometry = new THREE.SphereGeometry(0.05, 32, 32);
+        const noseMaterial = new THREE.MeshPhongMaterial({ color: 0xFFA07A });
+        const nose = new THREE.Mesh(noseGeometry, noseMaterial);
+        nose.position.set(0, 0.05, 0.98);
+        body.add(nose);
+
+        // 口を作成
+        const mouthGeometry = new THREE.TorusGeometry(0.2, 0.03, 16, 100, Math.PI);
+        const mouthMaterial = new THREE.MeshPhongMaterial({ color: 0xFFB6C1 });
+        const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
+        mouth.position.set(0, -0.1, 0.95);
+        mouth.rotation.x = Math.PI;
+        body.add(mouth);
+
+        // 長い平行な髭を作成
+        const createWhisker = (startX, startY, startZ, endX, endY, endZ) => {
+            const points = [];
+            points.push(new THREE.Vector3(startX, startY, startZ));
+            points.push(new THREE.Vector3(endX, endY, endZ));
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({ color: 0x000000 });
+            return new THREE.Line(geometry, material);
+        };
+
+        const whiskerLength = 1;
+        const whiskerSpacing = 0.05;
+        const whiskers = [
+            createWhisker(0.3, whiskerSpacing, 0.9, 0.3 + whiskerLength, whiskerSpacing + 0.1, 0.9),
+            createWhisker(0.3, 0, 0.9, 0.3 + whiskerLength, 0, 0.9),
+            createWhisker(0.3, -whiskerSpacing, 0.9, 0.3 + whiskerLength, -whiskerSpacing - 0.1, 0.9),
+            createWhisker(-0.3, whiskerSpacing, 0.9, -0.3 - whiskerLength, whiskerSpacing + 0.1, 0.9),
+            createWhisker(-0.3, 0, 0.9, -0.3 - whiskerLength, 0, 0.9),
+            createWhisker(-0.3, -whiskerSpacing, 0.9, -0.3 - whiskerLength, -whiskerSpacing - 0.1, 0.9)
+        ];
+
+        whiskers.forEach(whisker => body.add(whisker));
+
         // 王冠を作成
         const crownGroup = new THREE.Group();
         const crownBaseGeometry = new THREE.CylinderGeometry(0.6, 0.65, 0.4, 32, 1, false);
@@ -169,8 +228,46 @@
             crownGroup.add(spike);
         }
 
+        const gemGeometry = new THREE.OctahedronGeometry(0.08);
+        const gemMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000, shininess: 100 });
+        for (let i = 0; i < 4; i++) {
+            const gem = new THREE.Mesh(gemGeometry, gemMaterial);
+            const angle = (i / 4) * Math.PI * 2;
+            gem.position.set(Math.cos(angle) * 0.6, 0.22, Math.sin(angle) * 0.6);
+            gem.rotation.x = Math.PI / 4;
+            crownGroup.add(gem);
+        }
+
+        // 広島東洋カープのCを追加（90度回転）
+        const carpLogoShape = new THREE.Shape();
+        carpLogoShape.absarc(0, 0, 0.2, 0, Math.PI * 1.5, false);
+        const carpLogoGeometry = new THREE.ShapeGeometry(carpLogoShape);
+        const carpLogoMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
+        const carpLogo = new THREE.Mesh(carpLogoGeometry, carpLogoMaterial);
+        carpLogo.position.set(0, 0.4, 0.7);
+        carpLogo.rotation.set(0, 0, Math.PI / 2);
+        carpLogo.scale.set(0.5, 0.5, 0.5);
+        crownGroup.add(carpLogo);
+
         crownGroup.position.set(0, 1.1, 0);
         body.add(crownGroup);
+
+        // 蝶ネクタイを作成
+        const bowGeometry = new THREE.BufferGeometry();
+        const bowVertices = new Float32Array([
+            -0.2, 0.1, 0,
+            -0.2, -0.1, 0,
+            0, 0, 0.1,
+            0.2, 0.1, 0,
+            0.2, -0.1, 0,
+            0, 0, 0.1
+        ]);
+        bowGeometry.setAttribute('position', new THREE.BufferAttribute(bowVertices, 3));
+        bowGeometry.computeVertexNormals();
+        const bowMaterial = new THREE.MeshPhongMaterial({ color: 0x05327C, side: THREE.DoubleSide });
+        const bow = new THREE.Mesh(bowGeometry, bowMaterial);
+        bow.position.set(0, -0.5, 0.9);
+        body.add(bow);
 
         // ライトを追加
         const light = new THREE.PointLight(0xFFFFFF, 1, 100);
@@ -182,13 +279,56 @@
 
         camera.position.z = 4;
 
-        // アニメーション
+        // マウスの動きを追跡するための変数
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+
+        // 回転の制限値（ラジアン）
+        const maxRotation = Math.PI / 3; // 60度
+
+        // マウスの動きを検知
+        document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+        function onDocumentMouseMove(event) {
+            mouseX = (event.clientX - window.innerWidth / 2) / 1000;
+            mouseY = (event.clientY - window.innerHeight / 2) / 1000;
+        }
+
+        // アニメーション関数
         function animate() {
             requestAnimationFrame(animate);
-            body.rotation.y += 0.01;
+
+            targetRotationY += (mouseX - targetRotationY) * 0.05;
+            targetRotationX += (mouseY - targetRotationX) * 0.05;
+
+            targetRotationY = Math.max(Math.min(targetRotationY, maxRotation), -maxRotation);
+            targetRotationX = Math.max(Math.min(targetRotationX, maxRotation), -maxRotation);
+
+            body.rotation.y = targetRotationY;
+            body.rotation.x = targetRotationX;
+
             renderer.render(scene, camera);
         }
+
         animate();
+
+        // ウィンドウのリサイズに対応
+        window.addEventListener('resize', onWindowResize, false);
+
+        function onWindowResize() {
+            const width = canvasContainer.clientWidth;
+            const height = canvasContainer.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(width, height);
+        }
+
+        // 初期リサイズ
+        onWindowResize();
     </script>
 </body>
 </html>
